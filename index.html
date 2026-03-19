@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תורנות ניקיון</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f0eb;
+            color: #2d2d2d;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 8px;
+            color: #3a3a3a;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        .current-week {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            margin: 0 auto 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .current-week h2 {
+            font-size: 1.3em;
+            margin-bottom: 4px;
+            color: #5a8f5a;
+        }
+        .current-week .date {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+        .task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .task-row:last-child { border-bottom: none; }
+        .person-name {
+            font-weight: 600;
+            font-size: 1.15em;
+        }
+        .task-name {
+            background: #f0f0f0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.95em;
+        }
+        .task-name.kitchen { background: #fff3e0; color: #e65100; }
+        .task-name.bathroom { background: #e3f2fd; color: #1565c0; }
+        .task-name.floors { background: #e8f5e9; color: #2e7d32; }
+
+        .upcoming {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .upcoming h3 {
+            font-size: 1.1em;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .upcoming-week {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+        }
+        .upcoming-week .week-date {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .upcoming-week .mini-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 תורנות ניקיון</h1>
+    <p class="subtitle">קטמונים</p>
+
+    <div id="current" class="current-week"></div>
+    <div id="upcoming" class="upcoming"></div>
+
+    <script>
+        const people = ['אביטל', 'אליסון', 'רות׳י'];
+        const tasks = [
+            { name: 'מטבח', key: 'kitchen', en: 'Kitchen' },
+            { name: 'שירותים + מיחזור', key: 'bathroom', en: 'Bathroom + Recycling' },
+            { name: 'רצפות', key: 'floors', en: 'Floors' }
+        ];
+
+        // Week 0 = March 20, 2026 (first Friday)
+        const startDate = new Date(2026, 2, 20); // March 20, 2026
+
+        // Rotation: each week, tasks shift
+        // Week 0: Avital=Bathroom+Recycling, Allison=Kitchen, Ruthie=Floors
+        // This means person index -> task index mapping:
+        // Week 0: [1, 0, 2] (Avital gets task 1, Allison gets task 0, Ruthie gets task 2)
+        const baseAssignment = [1, 0, 2];
+
+        function getWeekNumber(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            const diff = d - startDate;
+            const weekMs = 7 * 24 * 60 * 60 * 1000;
+            return Math.floor(diff / weekMs);
+        }
+
+        function getFridayForWeek(weekNum) {
+            const d = new Date(startDate);
+            d.setDate(d.getDate() + weekNum * 7);
+            return d;
+        }
+
+        function getAssignment(weekNum) {
+            const shift = ((weekNum % 3) + 3) % 3;
+            return people.map((person, i) => {
+                const taskIndex = (baseAssignment[i] + shift) % 3;
+                return { person, task: tasks[taskIndex] };
+            });
+        }
+
+        function formatDate(date) {
+            const months = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+                           'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+            return `${date.getDate()} ${months[date.getMonth()]}`;
+        }
+
+        function render() {
+            const now = new Date();
+            let currentWeek = getWeekNumber(now);
+            // If it's before the start date, show week 0
+            if (currentWeek < 0) currentWeek = 0;
+
+            const friday = getFridayForWeek(currentWeek);
+            const assignment = getAssignment(currentWeek);
+
+            document.getElementById('current').innerHTML = `
+                <h2>השבוע</h2>
+                <div class="date">יום שישי ${formatDate(friday)}</div>
+                ${assignment.map(a => `
+                    <div class="task-row">
+                        <span class="person-name">${a.person}</span>
+                        <span class="task-name ${a.task.key}">${a.task.name}</span>
+                    </div>
+                `).join('')}
+            `;
+
+            let upcomingHtml = '<h3>שבועות הבאים</h3>';
+            for (let i = 1; i <= 4; i++) {
+                const wk = currentWeek + i;
+                const fri = getFridayForWeek(wk);
+                const asgn = getAssignment(wk);
+                upcomingHtml += `
+                    <div class="upcoming-week">
+                        <div class="week-date">יום שישי ${formatDate(fri)}</div>
+                        ${asgn.map(a => `
+                            <div class="mini-row">
+                                <span>${a.person}</span>
+                                <span>${a.task.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            document.getElementById('upcoming').innerHTML = upcomingHtml;
+        }
+
+        render();
+    </script>
+</body>
+</html>
