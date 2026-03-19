@@ -47,19 +47,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 16px 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            background: #fafafa;
         }
-        .task-row:last-child { border-bottom: none; }
+        .task-row:last-child { margin-bottom: 0; }
         .person-name {
-            font-weight: 600;
-            font-size: 1.15em;
+            font-weight: 700;
+            font-size: 1.25em;
         }
         .task-name {
-            background: #f0f0f0;
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.95em;
+            font-size: 1.05em;
+            font-weight: 500;
         }
         .task-name.kitchen { background: #fff3e0; color: #e65100; }
         .task-name.bathroom { background: #e3f2fd; color: #1565c0; }
@@ -105,9 +107,9 @@
     <script>
         const people = ['אביטל', 'אליסון', 'רות׳י'];
         const tasks = [
-            { name: 'מטבח', key: 'kitchen', en: 'Kitchen' },
-            { name: 'שירותים + מיחזור', key: 'bathroom', en: 'Bathroom + Recycling' },
-            { name: 'רצפות', key: 'floors', en: 'Floors' }
+            { name: '🍳 מטבח', key: 'kitchen' },
+            { name: '🚿 שירותים + מיחזור', key: 'bathroom' },
+            { name: '🧹 רצפות', key: 'floors' }
         ];
 
         // Week 0 = March 20, 2026 (first Friday)
